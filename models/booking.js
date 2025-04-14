@@ -19,7 +19,7 @@ const Booking = sequelize.define('Booking', {
   }
 });
 
-// Define relationships
+
 const User = require('./user');
 const Apartment = require('./apartment');
 
