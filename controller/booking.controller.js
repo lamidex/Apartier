@@ -25,7 +25,7 @@ const bookingController = {
         }
       };
 
-      const payment = await paystack.transaction.initialize(paymentData);
+      const payment = await paystack.initializeTransaction(paymentData);
 
       
       const booking = await Booking.create({
@@ -57,7 +57,7 @@ const bookingController = {
         return res.status(404).json({ error: 'Booking not found' });
       }
 
-      const verification = await paystack.transaction.verify(reference);
+      const verification = await paystack.verifyTransaction(reference);
 
       if (verification.data.status === 'success') {
         booking.paymentStatus = 'COMPLETED';
