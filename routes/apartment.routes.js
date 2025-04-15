@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const apartmentController = require('../controllers/apartment.controller');
+const apartmentController = require('../controller/apartment.controller.js');
 const { isAdmin } = require('../middleware/admin');
 const upload = require('../middleware/upload');
 
