@@ -10,6 +10,9 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth.routes');
 const apartmentRoutes = require('./routes/apartment.routes');
 const bookingRoutes = require('./routes/booking.routes');
+const userRoutes = require('./routes/user.routes');
+
+
 
 const app = express();
 
@@ -37,6 +40,7 @@ app.use(express.static('views'));
 app.use('/auth', authRoutes);
 app.use('/api/apartments', apartmentRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/users', userRoutes);
 
 
 app.get('/', (req, res) => {
