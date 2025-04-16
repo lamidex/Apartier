@@ -54,7 +54,7 @@ const apartmentController = {
 
   
   getByState: async (req, res) => {
-    try {
+    try {     
       const { state } = req.params;
       const apartments = await Apartment.findAll({
         where: { state }
