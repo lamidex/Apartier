@@ -3,80 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Passport Auth</title>
+    <title>Dashboard - Apartier</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+
         .nav {
+            background-color: #fff;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #eee;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
         }
-        .profile-section {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
+
+        .nav h2 {
+            color: #2c3e50;
         }
-        .profile-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            margin-bottom: 15px;
+
+        .user-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
+
         .logout-btn {
-            background: #dc3545;
+            background: #e74c3c;
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 0.5rem 1rem;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .apartment-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .apartment-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .apartment-images {
+            height: 200px;
+            position: relative;
+        }
+
+        .apartment-images img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .apartment-details {
+            padding: 1.5rem;
+        }
+
+        .apartment-name {
+            font-size: 1.25rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .apartment-location {
+            color: #7f8c8d;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .apartment-price {
+            font-size: 1.5rem;
+            color: #2980b9;
+            margin-bottom: 1rem;
+        }
+
+        .book-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 4px;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .book-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .filters {
+            background: white;
+            padding: 1rem 2rem;
+            margin: 80px 2rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-width: 200px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        .pagination button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .pagination button.active {
+            background: #3498db;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="nav">
-        <h2>Welcome to Dashboard</h2>
-        <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    <nav class="nav">
+        <h2>Apartier</h2>
+        <div class="user-controls">
+            <span id="userEmail"></span>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="filters">
+        <input type="text" class="filter-input" placeholder="Search by name..." id="searchInput">
+        <select class="filter-input" id="stateFilter">
+            <option value="">All States</option>
+        </select>
+        <input type="number" class="filter-input" placeholder="Max price per night" id="priceFilter">
     </div>
 
-    <div class="profile-section">
-        <div id="userProfile">
-            Loading profile...
-        </div>
+    <main class="main-content" id="apartmentsGrid">
+        <!-- Apartments will be loaded here -->
+    </main>
+
+    <div class="pagination" id="pagination">
+        <!-- Pagination will be generated here -->
     </div>
 
     <script>
-        // Fetch user profile data
+        let currentPage = 1;
+        let totalPages = 1;
+
+        
         fetch('/api/users/profile', {
             credentials: 'include'
         })
         .then(response => response.json())
-        .then(data => {
-            console.log('User profile:', data);
-            
-            const profileHTML = `
-                ${data.profilePicture ? `<img src=${data.profilePicture} class="profile-image" alt="Profile">` : ''}
-                <h3>${data.firstName} ${data.lastName}</h3>
-                <p>Email: ${data.email || 'N/A'}</p>
-                <p>Account type: ${data.googleId ? 'Google Account' : 'Local Account'}</p>
-            `;
-            document.getElementById('userProfile').innerHTML = profileHTML;
-        })
-        .catch(err => {
-            console.error('Failed to load profile:', err);
-            document.getElementById('userProfile').innerHTML = 'Failed to load profile';
+        .then(user => {
+            document.getElementById('userEmail').textContent = user.email;
         });
 
+        
+        function loadApartments(page = 1) {
+            const searchTerm = document.getElementById('searchInput').value;
+            const state = document.getElementById('stateFilter').value;
+            const maxPrice = document.getElementById('priceFilter').value;
+
+            fetch(`/api/apartments?page=${page}&search=${searchTerm}&state=${state}&maxPrice=${maxPrice}`)
+                .then(response => response.json())
+                .then(data => {
+                    const grid = document.getElementById('apartmentsGrid');
+                    grid.innerHTML = '';
+                    
+                    data.apartments.forEach(apartment => {
+                        const card = createApartmentCard(apartment);
+                        grid.appendChild(card);
+                    });
+
+                    totalPages = data.totalPages;
+                    currentPage = page;
+                    updatePagination();
+                });
+        }
+
+        function createApartmentCard(apartment) {
+            const card = document.createElement('div');
+            card.className = 'apartment-card';
+            card.innerHTML = `
+                <div class="apartment-images">
+                    <img src="${apartment.image1}" alt="${apartment.name}">
+                </div>
+                <div class="apartment-details">
+                    <h3 class="apartment-name">${apartment.name}</h3>
+                    <p class="apartment-location">${apartment.state} - ${apartment.address}</p>
+                    <p class="apartment-price">₦${apartment.pricePerNight} per night</p>
+                    <button class="book-btn" onclick="bookApartment(${apartment.id})">Book Now</button>
+                </div>
+            `;
+            return card;
+        }
+
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = i === currentPage ? 'active' : '';
+                button.onclick = () => loadApartments(i);
+                pagination.appendChild(button);
+            }
+        }
+
+        async function bookApartment(apartmentId) {
+            const nights = prompt('How many nights would you like to stay?');
+            if (!nights || isNaN(nights) || nights < 1) return;
+
+            try {
+                const response = await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        apartmentId,
+                        numberOfNights: parseInt(nights)
+                    }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                if (data.authorizationUrl) {
+                    window.location.href = data.authorizationUrl;
+                }
+            } catch (error) {
+                alert('Booking failed: ' + error.message);
+            }
+        }
+
         function handleLogout() {
-            fetch('/api/users/logout', {
-                method: 'POST',
+            fetch('/auth/logout', {
+                method: 'GET',
                 credentials: 'include'
             })
             .then(() => {
@@ -84,6 +305,39 @@
             })
             .catch(err => console.error('Logout failed:', err));
         }
+
+        
+        fetch('/api/apartments/states')
+            .then(response => response.json())
+            .then(states => {
+                const stateFilter = document.getElementById('stateFilter');
+                states.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state;
+                    option.textContent = state;
+                    stateFilter.appendChild(option);
+                });
+            });
+
+        
+        document.getElementById('searchInput').addEventListener('input', debounce(() => loadApartments(1), 300));
+        document.getElementById('stateFilter').addEventListener('change', () => loadApartments(1));
+        document.getElementById('priceFilter').addEventListener('input', debounce(() => loadApartments(1), 300));
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        
+        loadApartments();
     </script>
 </body>
 </html>
