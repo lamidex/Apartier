@@ -34,7 +34,10 @@ passport.use(
 
         const newUser = await User.create({
           googleId: profile.id,
-          email: profile.emails[0].value
+          email: profile.emails[0].value,
+          role: 'USER',
+          lastlogin: new Data()
+
         });
 
         done(null, newUser);
