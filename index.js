@@ -5,7 +5,9 @@ const session = require('express-session');
 const cors = require('cors');
 require('./config/passport.setup');
 require('dotenv').config();
-
+const path = require('path');
+const expressSession = require('express-session');
+const { isAuthenticated } = require('./middleware/auth.js');
 
 const authRoutes = require('./routes/auth.routes');
 const apartmentRoutes = require('./routes/apartment.routes');
@@ -23,11 +25,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-app.use(session({
+app.use(expressSession({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+      maxAge: 24 * 60 * 60 * 1000 
+  }
 }));
+
 
 
 app.use(passport.initialize());
@@ -44,7 +50,11 @@ app.use('/api/users', userRoutes);
 
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/views/home.html');
+  res.sendFile(path.join(__dirname, 'src/views/home.html'));
+});
+
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'src/views/login.html'));
 });
 
 
