@@ -8,6 +8,7 @@ router.post('/apartments', isAdmin, upload.fields([
   { name: 'image1', maxCount: 1 },
   { name: 'image2', maxCount: 1 }
 ]), apartmentController.createApartment);
+
 router.get('/apartments/state/:state', apartmentController.getByState);
 router.get('/apartments/available', apartmentController.getTotalAvailable);
 
