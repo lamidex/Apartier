@@ -1,10 +1,8 @@
 const router = require('express').Router();
 const bookingController = require('../controller/booking.controller.js');
-const { isAuthenticated } = require('../middleware/auth');
+const { verifyToken } = require('../middleware/auth');
 
-router.post('/bookings', isAuthenticated, bookingController.createBooking);
-
-
-router.get('/bookings/verify/:reference', isAuthenticated, bookingController.verifyPayment);
+router.post('/', verifyToken, bookingController.createBooking);
+router.get('/verify/:reference', verifyToken, bookingController.verifyPayment);
 
 module.exports = router;

@@ -1,13 +1,11 @@
 const express = require('express');
 const { connectDB } = require('./config/db.js');
 const passport = require('passport');
-const session = require('express-session');
 const cors = require('cors');
 require('./config/passport.setup');
 require('dotenv').config();
 const path = require('path');
-const expressSession = require('express-session');
-const { isAuthenticated } = require('./middleware/auth.js');
+
 
 const authRoutes = require('./routes/auth.routes');
 const apartmentRoutes = require('./routes/apartment.routes');
@@ -23,16 +21,8 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static('views'));
 
-
-app.use(expressSession({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-      maxAge: 24 * 60 * 60 * 1000 
-  }
-}));
 
 
 
@@ -40,7 +30,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-app.use(express.static('views'));
+
 
 
 app.use('/auth', authRoutes);
