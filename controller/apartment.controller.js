@@ -1,5 +1,6 @@
 const Apartment = require('../models/apartment');
 const cloudinary = require('../config/cloudinary');
+const fs = require('fs');
 
 const apartmentController = {
   getAllApartments: async (req, res) => {
@@ -24,35 +25,53 @@ const apartmentController = {
     }
   },
 
-  
-  createApartment: async (req, res) => {
+   createApartment: async (req, res) => {
     try {
+      console.log('Request body:', req.body); 
       const { name, state, rooms, address, pricePerNight } = req.body;
-      const { image1, image2 } = req.files;
-
+      
+      if (!name || !state || !rooms || !address || !pricePerNight) {
+        return res.status(400).json({ 
+          error: 'All fields are required',
+          received: { name, state, rooms, address, pricePerNight }
+        });
+      }
+  
+      if (!req.files || !req.files.image1 || !req.files.image2) {
+        return res.status(400).json({ error: 'Both images are required' });
+      }
+  
+      const image1Path = req.files.image1[0].path;
+      const image2Path = req.files.image2[0].path;
+  
       
       const [image1Upload, image2Upload] = await Promise.all([
-        cloudinary.uploader.upload(image1.path),
-        cloudinary.uploader.upload(image2.path)
+        cloudinary.uploader.upload(image1Path),
+        cloudinary.uploader.upload(image2Path)
       ]);
-
+  
+      
       const apartment = await Apartment.create({
-        name,
-        state,
-        rooms,
-        address,
-        pricePerNight,
+        name: name.toString(),
+        state: state.toString(),
+        rooms: parseInt(rooms),
+        address: address.toString(),
+        pricePerNight: parseFloat(pricePerNight),
         image1: image1Upload.secure_url,
         image2: image2Upload.secure_url
       });
-
+  
+      
+      fs.unlinkSync(image1Path);
+      fs.unlinkSync(image2Path);
+  
       res.status(201).json(apartment);
     } catch (error) {
+      console.error('Apartment creation error:', error);
       res.status(500).json({ error: error.message });
     }
-  },
+   },
 
-  
   getByState: async (req, res) => {
     try {     
       const { state } = req.params;
@@ -65,7 +84,6 @@ const apartmentController = {
     }
   },
 
-  
   getTotalAvailable: async (req, res) => {
     try {
       const count = await Apartment.count({

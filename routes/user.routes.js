@@ -11,5 +11,12 @@ router.get('/profile', verifyToken, userController.getProfile);
 router.get('/all', verifyToken, isAdmin, userController.getAllUsers);
 router.put('/role', verifyToken, isAdmin, userController.updateUserRole);
 router.post('/create-admin', verifyToken, isAdmin, userController.createAdmin);
+router.get('/test-token', verifyToken, (req, res) => {
+    res.json({
+      message: 'Token is valid',
+      user: req.user
+    });
+  });
 
+  
 module.exports = router;

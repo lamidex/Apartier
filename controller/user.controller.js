@@ -49,8 +49,10 @@ const userController = {
         { expiresIn: '24h' }
       );
 
+      console.log('Generated Token:', token);
       res.json({ message: 'Login successful', token, user });
     } catch (error) {
+      console.error('Login error:', error);
       res.status(500).json({ error: error.message });
     }
   },
