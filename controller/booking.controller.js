@@ -1,7 +1,7 @@
 const Booking = require('../models/booking');
 const Apartment = require('../models/apartment');
 const paystack = require('../utils/paystack');
-const crypto = require('crypto');
+
 
 const bookingController = {
   createBooking: async (req, res) => {
@@ -124,19 +124,7 @@ const bookingController = {
       }
 
       
-      const hash = crypto
-        .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
-        .update(JSON.stringify(req.body))
-        .digest('hex');
-
-      if (hash !== req.headers['x-paystack-signature']) {
-        console.error('Invalid webhook signature');
-        return res.status(400).json({ error: 'Invalid signature' });
-      }
-
-      const event = req.body;
-      console.log('Verified webhook event received:', event);
-
+      
       if (event.event === 'charge.success') {
         const booking = await Booking.findOne({
           where: { paymentReference: event.data.reference },
