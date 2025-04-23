@@ -52,4 +52,5 @@ class PayStack {
 }
 
 const paystack = new PayStack(process.env.PAYSTACK_SECRET_KEY);
+
 module.exports = paystack;

@@ -1,6 +1,7 @@
 const Booking = require('../models/booking');
 const Apartment = require('../models/apartment');
 const paystack = require('../utils/paystack');
+const crypto = require('crypto');
 
 const bookingController = {
   createBooking: async (req, res) => {
@@ -14,7 +15,6 @@ const bookingController = {
 
       const totalAmount = numberOfNights * apartment.pricePerNight;
 
-      
       const paymentData = {
         amount: totalAmount * 100,
         email: req.user.email,
@@ -22,25 +22,28 @@ const bookingController = {
           apartmentId,
           numberOfNights,
           userId: req.user.id
-        }
+        },
+        callback_url: `${process.env.APP_URL || 'https://mysql-production-e899.up.railway.app'}/api/bookings/verify`
       };
 
       const payment = await paystack.initializeTransaction(paymentData);
 
-      
       const booking = await Booking.create({
         UserId: req.user.id,
         ApartmentId: apartmentId,
         numberOfNights,
         totalAmount,
-        paymentReference: payment.data.reference
+        paymentReference: payment.data.reference,
+        paymentStatus: 'PENDING'
       });
 
       res.json({
         authorizationUrl: payment.data.authorization_url,
-        reference: payment.data.reference
+        reference: payment.data.reference,
+        booking: booking
       });
     } catch (error) {
+      console.error('Booking creation error:', error);
       res.status(500).json({ error: error.message });
     }
   },
@@ -58,14 +61,27 @@ const bookingController = {
       }
 
       const verification = await paystack.verifyTransaction(reference);
+      console.log('Payment verification response:', verification);
 
-      if (verification.data.status === 'success') {
+      if (verification.data.status === 'success' || verification.data.status === 'SUCCESS') {
         booking.paymentStatus = 'COMPLETED';
         await booking.save();
 
-        res.status(200).json({
+        const apartment = await Apartment.findByPk(booking.ApartmentId);
+        if (apartment) {
+          apartment.available = false;
+          await apartment.save();
+        }
+
+        res.json({
           status: 'success',
+          booking,
           apartmentName: booking.Apartment.name
+        });
+      } else if (verification.data.status === 'pending' || verification.data.status === 'PENDING') {
+        res.status(202).json({ 
+          status: 'pending',
+          message: 'Payment is being processed' 
         });
       } else {
         booking.paymentStatus = 'FAILED';
@@ -73,6 +89,92 @@ const bookingController = {
         res.status(400).json({ error: 'Payment failed' });
       }
     } catch (error) {
+      console.error('Payment verification error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  handleWebhook: async (req, res) => {
+    try {
+      
+      if (process.env.NODE_ENV !== 'production') {
+        const event = req.body;
+        console.log('Webhook event received:', event);
+
+        if (event.event === 'charge.success') {
+          const booking = await Booking.findOne({
+            where: { paymentReference: event.data.reference },
+            include: [Apartment]
+          });
+
+          if (booking) {
+            console.log('Updating booking status to COMPLETED');
+            booking.paymentStatus = 'COMPLETED';
+            await booking.save();
+
+            const apartment = await Apartment.findByPk(booking.ApartmentId);
+            if (apartment) {
+              console.log('Updating apartment availability to false');
+              apartment.available = false;
+              await apartment.save();
+            }
+          }
+        }
+        return res.sendStatus(200);
+      }
+
+      
+      const hash = crypto
+        .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
+        .update(JSON.stringify(req.body))
+        .digest('hex');
+
+      if (hash !== req.headers['x-paystack-signature']) {
+        console.error('Invalid webhook signature');
+        return res.status(400).json({ error: 'Invalid signature' });
+      }
+
+      const event = req.body;
+      console.log('Verified webhook event received:', event);
+
+      if (event.event === 'charge.success') {
+        const booking = await Booking.findOne({
+          where: { paymentReference: event.data.reference },
+          include: [Apartment]
+        });
+
+        if (booking) {
+          console.log('Updating booking status to COMPLETED');
+          booking.paymentStatus = 'COMPLETED';
+          await booking.save();
+
+          const apartment = await Apartment.findByPk(booking.ApartmentId);
+          if (apartment) {
+            console.log('Updating apartment availability to false');
+            apartment.available = false;
+            await apartment.save();
+          }
+        }
+      }
+
+      res.sendStatus(200);
+    } catch (error) {
+      console.error('Webhook handling error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  getUserBookings: async (req, res) => {
+    try {
+      const bookings = await Booking.findAll({
+        where: { UserId: req.user.id },
+        include: [Apartment],
+        order: [['createdAt', 'DESC']]
+      });
+
+      res.json(bookings);
+    } catch (error) {
+      console.error('Get user bookings error:', error);
       res.status(500).json({ error: error.message });
     }
   }

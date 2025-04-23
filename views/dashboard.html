@@ -288,7 +288,34 @@
 
                 const data = await response.json();
                 if (data.authorizationUrl) {
-                    window.location.href = data.authorizationUrl;
+                    localStorage.setItem('bookingReference', data.reference);
+                    
+                    
+                    const paymentWindow = window.open(data.authorizationUrl, '_blank');
+                    
+                    
+                    const checkPayment = setInterval(async () => {
+                        try {
+                            const verifyResponse = await fetch(`/api/bookings/verify/${data.reference}`, {
+                                headers: {
+                                    'Authorization': `Bearer ${userToken}`
+                                }
+                            });
+                            const verifyData = await verifyResponse.json();
+                            
+                            if (verifyData.status === 'success') {
+                                clearInterval(checkPayment);
+                                alert('Booking successful!');
+                                loadApartments(currentPage); 
+                            } else if (verifyData.status === 'failed') {
+                                clearInterval(checkPayment);
+                                alert('Payment failed. Please try again.');
+                            }
+                            setTimeout(() => clearInterval(checkPayment), 300000);
+                        } catch (error) {
+                            console.error('Payment verification error:', error);
+                        }
+                    }, 5000);
                 }
             } catch (error) {
                 alert('Booking failed: ' + error.message);
