@@ -76,7 +76,7 @@ A modern web application for booking short-stay apartments in Nigeria, built wit
 - GET /api/bookings/user - Get user's bookings
 
 ## Author ✨
-Olamide Sulaimon
+- Olamide Sulaimon
 
 ## Postman Documentation URL:
 https://documenter.getpostman.com/view/41007739/2sB2ixjEC4
