@@ -20,7 +20,7 @@ const userController = {
       const token = jwt.sign(
         { id: user.id, email: user.email, role: user.role },
         process.env.JWT_SECRET,
-        { expiresIn: '24h' }
+        { expiresIn: '3d' }
       );
 
       res.json({ message: 'Signup successful', token, user });
@@ -46,7 +46,7 @@ const userController = {
       const token = jwt.sign(
         { id: user.id, email: user.email, role: user.role },
         process.env.JWT_SECRET,
-        { expiresIn: '24h' }
+        { expiresIn: '3d' }
       );
 
       console.log('Generated Token:', token);
@@ -106,7 +106,7 @@ const userController = {
       const token = jwt.sign(
         { id: user.id, email: user.email, role: user.role },
         process.env.JWT_SECRET,
-        { expiresIn: '24h' }
+        { expiresIn: '3d' }
       );
 
       res.json({ message: 'User updated to admin', token, user });
