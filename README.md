@@ -47,13 +47,13 @@ A modern web application for booking short-stay apartments in Nigeria, built wit
 
 ## Installation 🚀
 
-1. Install dependencies
-npm install
+### Install dependencies
+- npm install
 
-2. Create a .env file
+### Create a .env file
 
-3. Start the server
-npm run dev
+### Start the server
+- npm run dev
 
 ## API Documentation 📚
 
