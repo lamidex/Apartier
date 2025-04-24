@@ -48,12 +48,12 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/users', userRoutes);
 
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'src/views/home.html'));
+app.get('/home', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views/dashboard.html'));
 });
 
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'src/views/login.html'));
+  res.sendFile(path.join(__dirname, '/views/login.html'));
 });
 
 
