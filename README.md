@@ -104,7 +104,7 @@ PAYSTACK_SECRET_KEY=your_paystack_secret_key
 - GET /api/bookings/user - Get user's bookings
 
 ## Author ✨
-- Olamide Sulaimon
+- Olamide Sulaimon Kazeem
 
 ## Postman Documentation URL:
 https://documenter.getpostman.com/view/41007739/2sB2ixjEC4
