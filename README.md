@@ -50,8 +50,8 @@ A modern web application for booking short-stay apartments in Nigeria, built wit
 ### Install dependencies
 - npm install
 
-### Create a .env file with the following variables:
-# Database Configuration
+## Create a .env file with the following variables:
+### Database Configuration
 DB_HOST=your_db_host
 DB_PORT=your_db_port
 DB_USER=your_db_user
@@ -59,28 +59,28 @@ DB_PASSWORD=your_db_password
 DB_NAME=your_db_name
 DB_DIALECT=mysql
 
-# Server Configuration
+### Server Configuration
 PORT=3500
 NODE_ENV=development
 
-# Authentication
+### Authentication
 JWT_SECRET=your_jwt_secret
 SESSION_SECRET=your_session_secret
 
-# Google OAuth
+### Google OAuth
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_CALLBACK_URL=http://127.0.0.1:5500/views/dashboard.html
 
-# Cloudinary Configuration
+### Cloudinary Configuration
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 
-# Paystack Configuration
+### Paystack Configuration
 PAYSTACK_SECRET_KEY=your_paystack_secret_key
 
-### Start the server
+## Start the server
 - npm run dev
 
 ## API Documentation 📚
