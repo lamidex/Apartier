@@ -97,10 +97,11 @@ const bookingController = {
   handleWebhook: async (req, res) => {
     try {
       
-      if (process.env.NODE_ENV !== 'production') {
-        const event = req.body;
+      const event = req.body;
         console.log('Webhook event received:', event);
-
+      
+      
+      if (process.env.NODE_ENV !== 'production') {
         if (event.event === 'charge.success') {
           const booking = await Booking.findOne({
             where: { paymentReference: event.data.reference },
